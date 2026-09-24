@@ -1,12 +1,15 @@
 """Signal-only desktop application for binary/digital and forex research."""
 
 import tkinter as tk
+from datetime import datetime
 from tkinter import messagebox, ttk
+from zoneinfo import ZoneInfo
 
 from core.data import fetch_candles
 from core.strategy import analyze_binary, analyze_forex
 
 
+PAKISTAN_TZ = ZoneInfo("Asia/Karachi")
 TIMEFRAMES = {
     "1 minute": ("1m", "1d"),
     "5 minutes": ("5m", "5d"),
@@ -81,8 +84,9 @@ class TradingAssistant(tk.Tk):
                 analysis = analyze_forex(candles, label)
             self.signal.set(analysis["signal"])
             self._write_details(analysis, symbol, label)
-            self.status.config(text=f"Updated {analysis['timestamp']} — data source: Yahoo Finance; broker: not connected")
-        except Exception as exc:  # UI boundary: show a readable error
+            pak_time = datetime.now(PAKISTAN_TZ).strftime("%Y-%m-%d %H:%M:%S PKT")
+            self.status.config(text=f"Updated {pak_time} — data source: Yahoo Finance; broker: not connected")
+        except Exception as exc:
             self.status.config(text="Could not update data")
             messagebox.showerror("Data error", str(exc))
 
